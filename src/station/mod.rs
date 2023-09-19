@@ -20,15 +20,15 @@ pub struct StationLabel {
 #[derive(Debug, Getters, new)]
 #[get = "pub"]
 
-/// Station metadata 
+/// Station metadata
 pub struct Station {
-    /// Interal italotreno ID 
+    /// Interal italotreno ID
     code: String,
 
     /// Partial URL to access <https://italoinviaggio.italotreno.it/it/stazione>
     url_coding: String,
 
-    /// Human friendly station name 
+    /// Human friendly station name
     name: String,
 }
 
@@ -43,12 +43,10 @@ pub struct StationRealtime {
     departure_board: Vec<StationTrainRealtime>,
 }
 
-
 /// Train data during its stay at the station
 #[derive(Deserialize, Debug, Getters)]
 #[get = "pub"]
 pub struct StationTrainRealtime {
-
     /// Train number
     #[serde(rename(deserialize = "Numero"))]
     number: String,
@@ -60,7 +58,7 @@ pub struct StationTrainRealtime {
     /// Scheduled departure time
     #[serde(rename(deserialize = "OraPassaggio"))]
     scheduled_time: String,
-    
+
     /// Real departure time
     #[serde(rename(deserialize = "NuovoOrario"))]
     forecast_time: String,

@@ -10,7 +10,6 @@ pub struct TrainRealtime {
     train_schedule: TrainSchedule,
 }
 
-
 /// Train trip
 #[derive(Deserialize, Debug, Getters)]
 #[get = "pub"]
@@ -54,8 +53,7 @@ pub struct TrainSchedule {
     stations_with_transit: Vec<TrainStation>,
 }
 
-
-/// Distruption data 
+/// Distruption data
 #[derive(Deserialize, Debug, Getters)]
 #[serde(rename_all = "PascalCase")]
 #[get = "pub"]
@@ -87,16 +85,16 @@ pub struct TrainStation {
     /// Rete Ferroviaria Italiana ID
     rfi_location_code: String,
 
-    /// Estimated time by which the train will leave the station 
+    /// Estimated time by which the train will leave the station
     estimated_departure_time: String,
 
-    /// Real time by which the train will leave the station 
+    /// Real time by which the train will leave the station
     actual_departure_time: String,
 
-    /// Estimated time by which the train will arrive to the station 
+    /// Estimated time by which the train will arrive to the station
     estimated_arrival_time: String,
 
-    /// Real time by which the train will arrive to the station 
+    /// Real time by which the train will arrive to the station
     actual_arrival_time: String,
 
     /// Platform

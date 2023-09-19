@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use anyhow::Context;
 use login::{LoginRequestBody, LoginResponse};
 use reqwest::Client;
-use station::{StationCode, StationLabel};
 pub use station::{Station, StationRealtime, StationTrainRealtime};
-pub use train::{TrainRealtime, TrainSchedule, TrainStation, Distruption};
+use station::{StationCode, StationLabel};
+pub use train::{Distruption, TrainRealtime, TrainSchedule, TrainStation};
 
 static LOGIN_ENDPOINT: &str = "https://big.ntvspa.it/BIG/v7/Rest/SessionManager.svc/Login";
 static STATION_LIST_ENDPOINT: &str = "https://italoinviaggio.italotreno.it/it/stazione";
@@ -18,10 +18,10 @@ mod login;
 mod station;
 mod train;
 
-/// Use this struct to access italotreno API. 
-/// 
+/// Use this struct to access italotreno API.
+///
 /// Use [`Self::default()`] to instantiate the interface.
-/// 
+///
 #[derive(Default)]
 pub struct ItaloApi {
     signature: Option<LoginResponse>,
@@ -46,9 +46,9 @@ impl ItaloApi {
         Ok(())
     }
 
-    /// Retrieves stations recognized by the italotreno information system. 
-    /// 
-    /// The struct contains internal Ids used by [`Self::station_realtime()`] 
+    /// Retrieves stations recognized by the italotreno information system.
+    ///
+    /// The struct contains internal Ids used by [`Self::station_realtime()`]
     pub async fn station_list(&self) -> anyhow::Result<Vec<Station>> {
         let res = self
             .client
@@ -99,7 +99,7 @@ impl ItaloApi {
             .collect())
     }
 
-    /// Retrieve the departure and arivval boards for a station using [`Self::station_realtime()`] 
+    /// Retrieve the departure and arivval boards for a station using [`Self::station_realtime()`]
     pub async fn station_realtime(&self, station: Station) -> anyhow::Result<StationRealtime> {
         Ok(self
             .client
@@ -110,7 +110,7 @@ impl ItaloApi {
             .await?)
     }
 
-    /// Retrieve realtime data on a moving train 
+    /// Retrieve realtime data on a moving train
     pub async fn train_realtime(&self, train_code: &str) -> anyhow::Result<TrainRealtime> {
         Ok(self
             .client
@@ -148,7 +148,8 @@ mod tests {
             .await;
         println!("{:?}", station_realtime);
         println!();
-        assert!(station_realtime.is_ok_and(|f| f.arrival_board().len() > 0 && f.departure_board().len() > 0));
+        assert!(station_realtime
+            .is_ok_and(|f| f.arrival_board().len() > 0 && f.departure_board().len() > 0));
 
         let train_realtime = api.train_realtime("8158").await;
         println!("{:?}", train_realtime);
