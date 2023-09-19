@@ -4,6 +4,7 @@ version = "0.0.1"
 edition = "2021"
 authors = ["Flavio Bizzarri <fl.bizzarri@gmail.com>"]
 license = "Apache-2.0"
+description = "Rust binding for Italo API"
 readme = "README.md"
 homepage = "https://github.com/newfla/italo-api"
 repository = "https://github.com/newfla/italo-api"
