@@ -17,12 +17,11 @@ pub struct StationLabel {
     value: String,
 }
 
+/// Station metadata
 #[derive(Debug, Getters, new)]
 #[get = "pub"]
-
-/// Station metadata
 pub struct Station {
-    /// Interal italotreno ID
+    /// Internal italotreno ID
     code: String,
 
     /// Partial URL to access <https://italoinviaggio.italotreno.it/it/stazione>
@@ -32,7 +31,7 @@ pub struct Station {
     name: String,
 }
 
-/// Abstraction over departure and departure baord for a station
+/// Abstraction over departure and departure board for a station
 #[derive(Deserialize, Debug, Getters)]
 #[get = "pub"]
 pub struct StationRealtime {

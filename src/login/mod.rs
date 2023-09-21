@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug)]
@@ -24,6 +26,14 @@ impl Default for LoginRequestBody<'_> {
 #[serde(rename_all = "PascalCase")]
 pub struct LoginResponse {
     signature: String,
+}
+
+impl Deref for LoginResponse {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.signature
+    }
 }
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "PascalCase")]

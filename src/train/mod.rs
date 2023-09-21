@@ -37,8 +37,9 @@ pub struct TrainSchedule {
     #[serde(rename(deserialize = "ArrivalStationDescription"))]
     arrival_station_name: String,
 
-    /// Service distruption data
-    distruption: Distruption,
+    /// Service disruption data
+    #[serde(rename(deserialize = "Distruption"))]
+    disruption: Disruption,
 
     /// Additional information on the first station
     #[serde(rename(deserialize = "StazionePartenza"))]
@@ -53,11 +54,11 @@ pub struct TrainSchedule {
     stations_with_transit: Vec<TrainStation>,
 }
 
-/// Distruption data
+/// Disruption data
 #[derive(Deserialize, Debug, Getters)]
 #[serde(rename_all = "PascalCase")]
 #[get = "pub"]
-pub struct Distruption {
+pub struct Disruption {
     /// Delay (in minutes)
     delay_amount: i32,
 
@@ -71,7 +72,7 @@ pub struct Distruption {
     running_state: u16,
 }
 
-/// Station data enriched with train informations
+/// Station data enriched with train information
 #[derive(Deserialize, Debug, Getters)]
 #[serde(rename_all = "PascalCase")]
 #[get = "pub"]

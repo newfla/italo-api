@@ -1,11 +1,16 @@
 use std::collections::HashMap;
 
-use anyhow::Context;
+use anyhow::{Context, Ok};
+
+use journey::InternalJourneyRequest;
+pub use journey::{
+    Journey, JourneyRequest, JourneyResults, JourneySegment, JourneysSolution, Stop,
+};
 use login::{LoginRequestBody, LoginResponse};
 use reqwest::Client;
 pub use station::{Station, StationRealtime, StationTrainRealtime};
 use station::{StationCode, StationLabel};
-pub use train::{Distruption, TrainRealtime, TrainSchedule, TrainStation};
+pub use train::{Disruption, TrainRealtime, TrainSchedule, TrainStation};
 
 static LOGIN_ENDPOINT: &str = "https://big.ntvspa.it/BIG/v7/Rest/SessionManager.svc/Login";
 static STATION_LIST_ENDPOINT: &str = "https://italoinviaggio.italotreno.it/it/stazione";
@@ -14,6 +19,10 @@ static STATION_REALTIME_ENDPOINT: &str =
 static TRAIN_REALTIME_ENDPOINT: &str =
     "https://italoinviaggio.italotreno.it/api/RicercaTrenoService?&TrainNumber=";
 
+static SEARCH_SOLUTIONS: &str =
+    "https://big.ntvspa.it/BIG/v7/Rest/BookingManager.svc/GetAvailableTrains";
+
+mod journey;
 mod login;
 mod station;
 mod train;
@@ -72,7 +81,7 @@ impl ItaloApi {
             raw_lists
                 .1
                 .split_once("ItaloInViaggio.Resources.localizzation")
-                .context("localizzation not found")?
+                .context("localization not found")?
                 .0
                 .trim_end()
                 .trim_end_matches(';'),
@@ -99,7 +108,7 @@ impl ItaloApi {
             .collect())
     }
 
-    /// Retrieve the departure and arivval boards for a station using [`Self::station_realtime()`]
+    /// Retrieve the departure and arrival boards for a station using [`Self::station_realtime()`]
     pub async fn station_realtime(&self, station: Station) -> anyhow::Result<StationRealtime> {
         Ok(self
             .client
@@ -120,10 +129,38 @@ impl ItaloApi {
             .json()
             .await?)
     }
+
+    /// Search journey solutions between stations
+    pub async fn find_journeys(
+        &mut self,
+        journey: &JourneyRequest,
+    ) -> anyhow::Result<JourneyResults> {
+        match self.is_initialized() {
+            true => Ok(()),
+            false => self.init().await,
+        }?;
+
+        Ok(self
+            .client
+            .post(SEARCH_SOLUTIONS)
+            .json(&InternalJourneyRequest::new(
+                self.signature.as_deref().unwrap(),
+                2,
+                journey,
+            ))
+            .send()
+            .await?
+            .json()
+            .await?)
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::ops::Add;
+
+    use chrono::{Duration, Utc};
+
     use super::*;
 
     #[tokio::test]
@@ -154,5 +191,31 @@ mod tests {
         let train_realtime = api.train_realtime("8158").await;
         println!("{:?}", train_realtime);
         println!();
+
+        let start_station = Station::new(
+            "NAC".to_string(),
+            "napoli-centrale".to_string(),
+            "Napoli Centrale".to_string(),
+        );
+        let end_station = Station::new(
+            "MC_".to_string(),
+            "milano-centrale".to_string(),
+            "Milano Centrale".to_string(),
+        );
+
+        let solutions = api
+            .find_journeys(
+                &&JourneyRequest::default()
+                    .set_departure_station(start_station)
+                    .set_arrival_station(end_station)
+                    .set_interval_start_date_time(Utc::now())
+                    .set_interval_end_date_time(Utc::now().add(Duration::hours(5)))
+                    .set_override_interval_time_restriction(true),
+            )
+            .await;
+
+        println!("{:?}", solutions);
+        println!();
+        assert!(solutions.is_ok());
     }
 }
